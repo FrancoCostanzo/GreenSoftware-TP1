@@ -4,7 +4,7 @@ import random
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import threading
-from ordenamientos import bubble_sort_step, insertion_sort_step, selection_sort_step, quick_sort_step
+from ordenamientos import bubble_sort_step, insertion_sort_step, selection_sort_step, quick_sort_step, bogosort_step
 from calculos import calcular_horas_para_compensar, iniciar_rastreador, detener_rastreador
 
 
@@ -36,7 +36,7 @@ def animar_cargando():
 
 def actualizar_menu():
     metodo_ordenamiento_menu['menu'].delete(0, 'end')
-    for metodo in ["Bubble Sort", "Insertion Sort", "Selection Sort", "Quick Sort"]:
+    for metodo in ["Bubble Sort", "Insertion Sort", "Selection Sort", "Quick Sort", "Bogosort"]:
         metodo_ordenamiento_menu['menu'].add_command(label=metodo, command=tk._setit(metodo_ordenamiento_var, metodo))
 
 
@@ -60,7 +60,8 @@ def procesar_datos():
 
 
 def actualizar_ordenamiento():
-    global i, j, step, tracker, stack
+    #Global ademas de crear variables globales, permite acceder y bueno, poniendo datos alli se arregla
+    global i, j, step, tracker, stack, datos
 
     metodo_ordenamiento = metodo_ordenamiento_var.get()  # Obtener el método seleccionado
 
@@ -75,14 +76,20 @@ def actualizar_ordenamiento():
         indices_a_colorear = [i]
     elif metodo_ordenamiento == "Quick Sort":
         completo, stack, indices_a_colorear = quick_sort_step(datos, stack)
+    elif metodo_ordenamiento == "Bogosort":  
+        completo, datos = bogosort_step(datos)
+        indices_a_colorear = range(len(datos)) if not completo else []
+
 
     plt.clf()
     plt.bar(range(len(datos)), datos, color="blue", edgecolor="black")
 
     # Colorear las barras
     for idx in indices_a_colorear:
-        if idx < len(datos):
+        if idx < len(datos) and (metodo_ordenamiento != "Bogosort"):
             plt.bar(idx, datos[idx], color="red", edgecolor="black")
+        else: 
+            plt.bar(idx, datos[idx], color="purple", edgecolor="black")
 
     plt.xlabel('Índice')
     plt.ylabel('Valor')
