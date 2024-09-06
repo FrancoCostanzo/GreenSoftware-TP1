@@ -1,3 +1,6 @@
+import random
+
+
 def bubble_sort_step(arr, i, j):
     n = len(arr)
     if i < n - 1:
@@ -65,17 +68,17 @@ def partition(arr, low, high):
     arr[i + 1], arr[high] = arr[high], arr[i + 1]  # Coloca el pivote en la posición correcta
     return i + 1  # Devuelve el índice del pivote
 
-import random
 
 def is_sorted(arr):
-    #Verifica si la lista está ordenada.
+    # Verifica si la lista está ordenada.
     for i in range(len(arr) - 1):
         if arr[i] > arr[i + 1]:
             return False
     return True
 
+
 def bogosort_step(arr):
-    #por los jajas
+    # por los jajas
     if is_sorted(arr):
         return True, arr
     random.shuffle(arr)

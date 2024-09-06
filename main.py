@@ -7,6 +7,10 @@ import threading
 from ordenamientos import bubble_sort_step, insertion_sort_step, selection_sort_step, quick_sort_step, bogosort_step
 from calculos import calcular_horas_para_compensar, iniciar_rastreador, detener_rastreador
 
+# Variables globales
+hilo_ordenamiento = None
+cancelar_proceso = False
+
 
 # Funciones de interfaz
 def mostrar_mensaje_cargando():
@@ -37,11 +41,15 @@ def animar_cargando():
 def actualizar_menu():
     metodo_ordenamiento_menu['menu'].delete(0, 'end')
     for metodo in ["Bubble Sort", "Insertion Sort", "Selection Sort", "Quick Sort", "Bogosort"]:
-        metodo_ordenamiento_menu['menu'].add_command(label=metodo, command=tk._setit(metodo_ordenamiento_var, metodo))
+        metodo_ordenamiento_menu['menu'].add_command(
+            label=metodo,
+            command=lambda valor = metodo: metodo_ordenamiento_var.set(valor)
+        )
 
 
 def procesar_datos():
-    global datos, i, j, tracker, metodo_ordenamiento, step, stack
+    global datos, i, j, tracker, metodo_ordenamiento, step, stack, hilo_ordenamiento, cancelar_proceso
+    cancelar_proceso = False  # Reiniciar la bandera de cancelación
     cantidad_datos = int(cantidad_datos_var.get())
     datos = [random.randint(0, 100000) for _ in range(cantidad_datos)]
     i = 0
@@ -55,52 +63,59 @@ def procesar_datos():
     mostrar_mensaje_cargando()  # Mostrar mensaje de cargando
 
     # Iniciar el proceso de ordenamiento en un hilo separado
-    hilo = threading.Thread(target=actualizar_ordenamiento)
-    hilo.start()
+    hilo_ordenamiento = threading.Thread(target=actualizar_ordenamiento)
+    hilo_ordenamiento.start()
+
+
+def cancelar_ordenamiento():
+    global cancelar_proceso
+    cancelar_proceso = True
+    estado.set("Proceso cancelado.")
+    ocultar_mensaje_cargando()  # Ocultar mensaje de cargando
 
 
 def actualizar_ordenamiento():
-    #Global ademas de crear variables globales, permite acceder y bueno, poniendo datos alli se arregla
     global i, j, step, tracker, stack, datos
 
     metodo_ordenamiento = metodo_ordenamiento_var.get()  # Obtener el método seleccionado
 
-    if metodo_ordenamiento == "Bubble Sort":
-        completo, i, j = bubble_sort_step(datos, i, j)
-        indices_a_colorear = [j, j + 1]
-    elif metodo_ordenamiento == "Insertion Sort":
-        completo, i = insertion_sort_step(datos, i)
-        indices_a_colorear = [i]
-    elif metodo_ordenamiento == "Selection Sort":
-        completo, i = selection_sort_step(datos, i)
-        indices_a_colorear = [i]
-    elif metodo_ordenamiento == "Quick Sort":
-        completo, stack, indices_a_colorear = quick_sort_step(datos, stack)
-    elif metodo_ordenamiento == "Bogosort":  
-        completo, datos = bogosort_step(datos)
-        indices_a_colorear = range(len(datos)) if not completo else []
+    while True:
+        if cancelar_proceso:
+            return  # Terminar el hilo si se canceló el proceso
 
+        if metodo_ordenamiento == "Bubble Sort":
+            completo, i, j = bubble_sort_step(datos, i, j)
+            indices_a_colorear = [j, j + 1]
+        elif metodo_ordenamiento == "Insertion Sort":
+            completo, i = insertion_sort_step(datos, i)
+            indices_a_colorear = [i]
+        elif metodo_ordenamiento == "Selection Sort":
+            completo, i = selection_sort_step(datos, i)
+            indices_a_colorear = [i]
+        elif metodo_ordenamiento == "Quick Sort":
+            completo, stack, indices_a_colorear = quick_sort_step(datos, stack)
+        elif metodo_ordenamiento == "Bogosort":
+            completo, datos = bogosort_step(datos)
+            indices_a_colorear = range(len(datos)) if not completo else []
 
-    plt.clf()
-    plt.bar(range(len(datos)), datos, color="blue", edgecolor="black")
+        plt.clf()
+        plt.bar(range(len(datos)), datos, color="blue", edgecolor="black")
 
-    # Colorear las barras
-    for idx in indices_a_colorear:
-        if idx < len(datos):
-            plt.bar(idx, datos[idx], color="red", edgecolor="black")
+        # Colorear las barras
+        for idx in indices_a_colorear:
+            if idx < len(datos):
+                plt.bar(idx, datos[idx], color="red", edgecolor="black")
 
+        plt.xlabel('Índice')
+        plt.ylabel('Valor')
+        plt.title(f'Ordenamiento por {metodo_ordenamiento}')
+        canvas.draw()
 
-    plt.xlabel('Índice')
-    plt.ylabel('Valor')
-    plt.title(f'Ordenamiento por {metodo_ordenamiento}')
-    canvas.draw()
-
-    if not completo:
-        ventana.after(1, actualizar_ordenamiento)  # Ajustar el intervalo para mejor rendimiento
-    else:
-        emisiones_totales_kg = detener_rastreador(tracker)
-        calcular_emisiones(emisiones_totales_kg)
-        ocultar_mensaje_cargando()  # Ocultar mensaje de cargando
+        if completo:
+            emisiones_totales_kg = detener_rastreador(tracker)
+            calcular_emisiones(emisiones_totales_kg)
+            ocultar_mensaje_cargando()  # Ocultar mensaje de cargando
+            break
 
 
 def calcular_emisiones(emisiones_totales_kg):
@@ -115,6 +130,7 @@ def calcular_emisiones(emisiones_totales_kg):
 # Configuración de la ventana
 ventana = tk.Tk()
 ventana.title("Calculadora de Emisiones de CO2")
+ventana.state('zoomed')  # Poner la ventana en modo pantalla completa con los controles visibles
 
 instrucciones = ttk.Label(ventana,
                           text="Selecciona la cantidad de datos, el método de ordenamiento y haz clic en calcular.")
@@ -131,8 +147,12 @@ metodo_ordenamiento_menu = ttk.OptionMenu(ventana, metodo_ordenamiento_var, "Bub
 metodo_ordenamiento_menu.pack(pady=5)
 actualizar_menu()
 
+# Botones para iniciar y cancelar el proceso
 boton_calcular = ttk.Button(ventana, text="Calcular Emisiones", command=procesar_datos)
 boton_calcular.pack(pady=10)
+
+boton_cancelar = ttk.Button(ventana, text="Cancelar", command=cancelar_ordenamiento)
+boton_cancelar.pack(pady=10)
 
 # Elementos de carga
 mensaje_cargando = ttk.Label(ventana, text="Cargando, por favor espere...", font=("Helvetica", 16, "bold"),
