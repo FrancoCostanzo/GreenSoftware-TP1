@@ -86,10 +86,9 @@ def actualizar_ordenamiento():
 
     # Colorear las barras
     for idx in indices_a_colorear:
-        if idx < len(datos) and (metodo_ordenamiento != "Bogosort"):
+        if idx < len(datos):
             plt.bar(idx, datos[idx], color="red", edgecolor="black")
-        else: 
-            plt.bar(idx, datos[idx], color="purple", edgecolor="black")
+
 
     plt.xlabel('Índice')
     plt.ylabel('Valor')
