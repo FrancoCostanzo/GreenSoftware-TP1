@@ -1,0 +1,70 @@
+{
+  "data_count": 50,
+  "algorithm": "Quick Sort",
+  "tree_absorption": 30.0,
+  "visualization_speed": 50,
+  "theme": "default",
+  "auto_save_results": true,
+  "show_detailed_stats": false,
+  "window_geometry": "1200x800",
+  "last_export_directory": "./exports",
+  "algorithms": {
+    "Bubble Sort": {
+      "enabled": true,
+      "description": "Algoritmo educativo O(n²)",
+      "recommended_max_size": 100
+    },
+    "Insertion Sort": {
+      "enabled": true,
+      "description": "Eficiente para arrays pequeños O(n²)",
+      "recommended_max_size": 500
+    },
+    "Selection Sort": {
+      "enabled": true,
+      "description": "Simple pero ineficiente O(n²)",
+      "recommended_max_size": 200
+    },
+    "Quick Sort": {
+      "enabled": true,
+      "description": "Muy eficiente para uso general O(n log n)",
+      "recommended_max_size": 10000
+    },
+    "Bogosort": {
+      "enabled": true,
+      "description": "Solo para fines educativos O(n!)",
+      "recommended_max_size": 8
+    }
+  },
+  "visualization": {
+    "color_scheme": {
+      "bars": "#3498db",
+      "active_bars": "#e74c3c",
+      "sorted_bars": "#27ae60",
+      "background": "#f0f0f0"
+    },
+    "animation_speed_range": [1, 200],
+    "show_comparisons": true,
+    "show_step_counter": true
+  },
+  "carbon_calculations": {
+    "tree_absorption_range": [10, 100],
+    "default_tree_absorption": 30,
+    "carbon_price_usd": 50.0,
+    "show_equivalencies": true,
+    "show_cost_analysis": false
+  },
+  "export_settings": {
+    "default_format": "csv",
+    "include_metadata": true,
+    "timestamp_format": "%Y-%m-%d %H:%M:%S",
+    "auto_backup": false,
+    "max_history_entries": 1000
+  },
+  "ui_preferences": {
+    "font_size": 10,
+    "font_family": "Segoe UI",
+    "show_tooltips": true,
+    "confirm_before_exit": true,
+    "remember_window_position": true
+  }
+}
